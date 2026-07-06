@@ -1,0 +1,12 @@
+[
+  {
+    "skillId": "NAV_001_001",
+    "skillName": "Navigate to Home Dashboard",
+    "keyStrengths": [
+      "Uses networkidle instead of a hard wait",
+      "Arrange-Act-Assert structure",
+      "Descriptive test name"
+    ],
+    "testCode": "test('should navigate to home dashboard and verify UI elements load', async ({ page }) => {\n  const url = 'https://rahulshettyacademy.com/client/#/dashboard/dash';\n  await page.goto(url, { waitUntil: 'networkidle' });\n\n  expect(page.url()).toContain('#/dashboard/dash');\n  await expect(page.locator(\"button[aria-label='HOME']\")).toBeVisible();\n  await expect(page.locator(\"[class*='products']\")).toBeVisible();\n});"
+  }
+]

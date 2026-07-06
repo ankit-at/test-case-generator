@@ -1,0 +1,77 @@
+[
+  {
+    "categoryId": "NAV001",
+    "categoryName": "Navigation & Authentication",
+    "categoryDescription": "Core navigation and sign-in flows for the storefront.",
+    "skills": [
+      {
+        "skillId": "NAV_001_001",
+        "skillName": "Navigate to Home Dashboard",
+        "description": "Load the dashboard and confirm the primary UI regions render.",
+        "actionType": "Navigation",
+        "steps": [
+          "Navigate to https://rahulshettyacademy.com/client/#/dashboard/dash",
+          "Wait for the page network activity to settle",
+          "Verify the HOME button is visible",
+          "Verify the filters panel is visible",
+          "Verify the product grid is visible"
+        ],
+        "expectedResult": "Dashboard loads with the HOME button, filters panel and product grid all visible.",
+        "elementSelectors": {
+          "homeButton": "button[aria-label='HOME']",
+          "productGrid": "[class*='products']"
+        }
+      },
+      {
+        "skillId": "NAV_001_002",
+        "skillName": "Sign in with valid credentials",
+        "description": "Authenticate an existing shopper.",
+        "actionType": "Input",
+        "steps": [
+          "Navigate to the login page",
+          "Enter the email into the email field",
+          "Enter the password into the password field",
+          "Click the Login button",
+          "Wait for redirect to the dashboard"
+        ],
+        "expectedResult": "User is authenticated and redirected to the dashboard.",
+        "testData": {
+          "email": "shopper@example.com",
+          "password": "REPLACE_ME"
+        },
+        "elementSelectors": {
+          "email": "#userEmail",
+          "password": "#userPassword",
+          "loginButton": "#login"
+        }
+      }
+    ]
+  },
+  {
+    "categoryId": "CART001",
+    "categoryName": "Cart",
+    "categoryDescription": "Add-to-cart and checkout entry flows.",
+    "skills": [
+      {
+        "skillId": "CART_001_001",
+        "skillName": "Add a product to the cart",
+        "description": "Add a single product and confirm the cart count increments.",
+        "actionType": "Click",
+        "steps": [
+          "Locate the target product card by name",
+          "Click Add to Cart on that product",
+          "Wait for the confirmation toast",
+          "Open the cart",
+          "Verify the product appears in the cart"
+        ],
+        "expectedResult": "The selected product is added and the cart count increments by one.",
+        "testData": {
+          "productName": "ADIDAS ORIGINAL"
+        },
+        "elementSelectors": {
+          "cartIcon": "[routerlink*='cart']"
+        }
+      }
+    ]
+  }
+]

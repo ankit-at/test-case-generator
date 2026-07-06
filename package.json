@@ -1,0 +1,40 @@
+{
+  "name": "test-case-generator",
+  "version": "1.0.0",
+  "description": "Generate production-ready test cases from a structured skills inventory using an LLM.",
+  "type": "commonjs",
+  "bin": {
+    "tcgen": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "generate": "ts-node src/index.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "testing",
+    "test-generation",
+    "playwright",
+    "qa",
+    "automation"
+  ],
+  "author": "Ankit Tiwari",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.1",
+    "ajv": "^8.17.1",
+    "exceljs": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
