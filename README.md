@@ -5,6 +5,8 @@ unit of work, builds a focused prompt, generates a test through an LLM, scores
 the result with an LLM-as-judge pass, and outputs Playwright specs, JSON
 metadata and an XLSX export.
 
+![Demo — BRD to scored test cases](screenshots/demo.gif)
+
 It ships in two forms:
 
 - **CLI** — feed it a structured *skills inventory* JSON (see below).
