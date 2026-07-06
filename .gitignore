@@ -1,8 +1,19 @@
 node_modules/
 dist/
+dist-web/
+dist-server/
 .env
 .env.local
 *.log
 .DS_Store
 output/
 coverage/
+
+# SQLite database
+tcgen.db
+tcgen.db-shm
+tcgen.db-wal
+
+# Uploaded files
+server/uploads/*
+!server/uploads/.gitkeep

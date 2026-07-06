@@ -1,10 +1,57 @@
 # Test Case Generator
 
-A command-line agent that turns a structured **skills inventory** (JSON) into
-production-ready test cases. It parses and enriches each skill, builds a focused
-prompt, generates a test through an LLM, optionally scores the result with an
-LLM-as-judge pass, and writes the output as Playwright specs, JSON metadata and
-an XLSX export.
+Turns requirements into production-ready test cases. It parses and enriches each
+unit of work, builds a focused prompt, generates a test through an LLM, scores
+the result with an LLM-as-judge pass, and outputs Playwright specs, JSON
+metadata and an XLSX export.
+
+It ships in two forms:
+
+- **CLI** — feed it a structured *skills inventory* JSON (see below).
+- **Web UI** — log in, upload a BRD PDF, pick a module context and scope, and
+  generate + track test cases from the browser.
+
+```
+BRD PDF ──▶ extract ──▶ Skills ──▶ Parser ──▶ Prompt ──▶ LLM ──▶ Evaluator ──▶ Formatter ──▶ Files
+ (UI)      text→skills           enrich     builder     gen     score/refine   spec/json/xlsx
+```
+
+## Web UI
+
+A React + Vite frontend over an Express + SQLite backend, reusing the same
+generation core.
+
+- **Roles.** An **admin** manages users and the module-context library, and sees
+  every run across all users with a per-user filter. A **generator** logs in,
+  creates runs, and sees only their own.
+- **Generate flow.** Title → upload BRD PDF (text is extracted and previewed) →
+  select a module context (admin-authored) → choose scope (functional,
+  non-functional, security, performance, usability, negative/edge) + free-text
+  notes → generate. Results land on a dashboard with `.spec.ts` / JSON / XLSX
+  downloads per run.
+
+### Run it
+
+```bash
+npm install
+cp .env.example .env          # set ANTHROPIC_API_KEY, JWT_SECRET, ADMIN_* 
+npm run app                   # API on :3001 + Vite dev server on :5173
+```
+
+Open http://localhost:5173 and sign in with the seed admin (`ADMIN_EMAIL` /
+`ADMIN_PASSWORD` from `.env`, created on first boot). Create generator users and
+add module contexts under **Admin**.
+
+Production single-server mode: `npm run web:build` then `npm run server` serves
+the built UI from the API process.
+
+| Piece | Location |
+|-------|----------|
+| Backend (auth, SQLite, routes, BRD pipeline) | `server/` |
+| Frontend (React pages) | `web/` |
+| Generation core (shared with CLI) | `src/` |
+
+## CLI
 
 ```
 Skills JSON ──▶ Parser ──▶ Prompt Builder ──▶ LLM ──▶ Evaluator ──▶ Formatter ──▶ Files
