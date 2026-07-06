@@ -1,6 +1,12 @@
 import { Router } from "express";
 import db, { UserRow } from "../db";
-import { requireAuth, requireRole, hashPassword, AuthedRequest } from "../auth";
+import {
+  requireAuth,
+  requireRole,
+  hashPassword,
+  AuthedRequest,
+  MIN_PASSWORD_LENGTH,
+} from "../auth";
 
 const router = Router();
 
@@ -22,6 +28,14 @@ router.post("/", (req, res) => {
     return res
       .status(400)
       .json({ error: "email, password and name are required." });
+  }
+  if (String(password).length < MIN_PASSWORD_LENGTH) {
+    return res.status(400).json({
+      error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+    });
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
+    return res.status(400).json({ error: "Invalid email address." });
   }
   const normalizedRole = role === "admin" ? "admin" : "generator";
   const existing = db

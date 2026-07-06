@@ -31,7 +31,8 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
       text,
     });
   } catch (err) {
-    res.status(500).json({ error: `PDF parse failed: ${(err as Error).message}` });
+    console.error("PDF parse failed:", err);
+    res.status(500).json({ error: "Could not parse the PDF file." });
   }
 });
 

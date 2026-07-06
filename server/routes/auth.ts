@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import db, { UserRow } from "../db";
 import {
   verifyPassword,
@@ -9,7 +10,16 @@ import {
 
 const router = Router();
 
-router.post("/login", (req, res) => {
+// Throttle credential guessing: max 10 login attempts per IP per 15 minutes.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts. Try again later." },
+});
+
+router.post("/login", loginLimiter, (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });

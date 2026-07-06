@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import * as fs from "fs";
+import * as crypto from "crypto";
 import * as path from "path";
 import bcrypt from "bcryptjs";
 
@@ -105,19 +105,42 @@ CREATE TABLE IF NOT EXISTS test_cases (
 );
 `);
 
+const WEAK_ADMIN_PASSWORDS = new Set(["admin123", "admin", "password", "changeme"]);
+
 /** Create the seed admin from env if no users exist yet. */
 export function seedAdmin(): void {
   const count = (db.prepare("SELECT COUNT(*) AS n FROM users").get() as { n: number }).n;
   if (count > 0) return;
 
-  const email = process.env.ADMIN_EMAIL || "admin@example.com";
-  const password = process.env.ADMIN_PASSWORD || "admin123";
+  const email = (process.env.ADMIN_EMAIL || "admin@example.com").toLowerCase();
   const name = process.env.ADMIN_NAME || "Administrator";
+
+  let password = process.env.ADMIN_PASSWORD || "";
+  let generated = false;
+
+  if (!password || WEAK_ADMIN_PASSWORDS.has(password) || password.length < 8) {
+    // No usable password supplied: mint a strong random one and show it once.
+    password = crypto.randomBytes(15).toString("base64url");
+    generated = true;
+  }
+
   const hash = bcrypt.hashSync(password, 10);
   db.prepare(
     "INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'admin')"
-  ).run(email.toLowerCase(), hash, name);
-  console.log(`Seeded admin user: ${email} (change the password after first login)`);
+  ).run(email, hash, name);
+
+  if (generated) {
+    console.log(
+      "\n============================================================\n" +
+        `Seeded admin account: ${email}\n` +
+        `Generated password:  ${password}\n` +
+        "Save this now and change it after first login.\n" +
+        "(Set ADMIN_PASSWORD in .env to choose your own.)\n" +
+        "============================================================\n"
+    );
+  } else {
+    console.log(`Seeded admin account: ${email} (using ADMIN_PASSWORD from env).`);
+  }
 }
 
 export default db;

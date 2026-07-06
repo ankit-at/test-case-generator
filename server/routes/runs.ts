@@ -27,7 +27,12 @@ router.post("/", async (req: AuthedRequest, res) => {
     });
     res.status(201).json(outcome);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    // Log the detail server-side; return a safe, generic message to the client.
+    console.error(`Run generation failed for user ${req.user!.id}:`, err);
+    res.status(500).json({
+      error:
+        "Generation failed. Check the server logs and that ANTHROPIC_API_KEY is valid.",
+    });
   }
 });
 

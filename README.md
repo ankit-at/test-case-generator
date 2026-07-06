@@ -161,6 +161,34 @@ Written to the `--out` directory:
 Low-scoring tests (below the configured threshold, default 75) are automatically
 refined once using the evaluator's feedback, and the higher-scoring version is kept.
 
+## Security
+
+- **`JWT_SECRET` is required** (min 16 chars). The server refuses to issue or
+  verify tokens without it — no insecure fallback. Generate one with
+  `openssl rand -base64 32`.
+- **No default admin password.** On first boot, if `ADMIN_PASSWORD` is unset or
+  weak, a strong random password is generated and printed to the server console
+  once. Change it after first login.
+- **Login is rate-limited** (10 attempts / 15 min / IP) to slow credential
+  guessing. Passwords are bcrypt-hashed; a minimum length of 8 is enforced.
+- **CORS is an allowlist** via `CORS_ORIGIN` (defaults to the local dev UI).
+- **Security headers** are set with `helmet`. All SQL uses parameterized
+  prepared statements. Internal error details are logged server-side, not
+  returned to clients.
+- `.env`, the SQLite database, and uploads are gitignored and never committed.
+
+Residual notes for a hosted deployment:
+
+- The JWT is stored in `localStorage`, so an XSS bug would expose it. Acceptable
+  for a local/single-team tool; move to an httpOnly cookie if you host it
+  publicly.
+- Serve over HTTPS behind a reverse proxy (the `Strict-Transport-Security`
+  header assumes TLS termination).
+- BRD text is passed to the LLM; treat generated output as untrusted if you ever
+  ingest third-party BRDs (prompt-injection surface).
+- `npm audit` reports a moderate transitive advisory in `uuid` (via `exceljs`);
+  the fix is a breaking `exceljs` downgrade, so it is tracked rather than forced.
+
 ## License
 
 MIT

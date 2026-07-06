@@ -3,8 +3,22 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import db, { UserRow, Role } from "../db";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 const TOKEN_TTL = "12h";
+export const MIN_PASSWORD_LENGTH = 8;
+
+/**
+ * Read the JWT secret lazily so it reflects the loaded environment, and refuse
+ * to run with a missing or weak secret (no insecure fallback).
+ */
+function jwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 16) {
+    throw new Error(
+      "JWT_SECRET must be set to a strong value (at least 16 characters)."
+    );
+  }
+  return secret;
+}
 
 export interface AuthUser {
   id: number;
@@ -32,7 +46,7 @@ export function issueToken(user: UserRow): string {
     name: user.name,
     role: user.role,
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_TTL });
+  return jwt.sign(payload, jwtSecret(), { expiresIn: TOKEN_TTL });
 }
 
 export function requireAuth(
@@ -47,7 +61,7 @@ export function requireAuth(
     return;
   }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
+    const decoded = jwt.verify(token, jwtSecret()) as AuthUser;
     // Confirm the user still exists.
     const row = db
       .prepare("SELECT id, email, name, role FROM users WHERE id = ?")
