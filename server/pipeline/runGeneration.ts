@@ -82,8 +82,8 @@ export async function runGeneration(req: RunRequest): Promise<RunOutcome> {
 
     const insertTc = db.prepare(
       `INSERT INTO test_cases
-        (run_id, skill_id, test_name, code, steps, assertions, tags, priority, score)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (run_id, skill_id, test_name, code, steps, assertions, tags, priority, score, executability, execution_issues)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
     const scores: number[] = [];
     const tx = db.transaction(() => {
@@ -97,7 +97,9 @@ export async function runGeneration(req: RunRequest): Promise<RunOutcome> {
           JSON.stringify(tc.metadata.assertions),
           JSON.stringify(tc.metadata.tags),
           tc.metadata.priority,
-          tc.evaluation?.overallScore ?? null
+          tc.evaluation?.overallScore ?? null,
+          tc.execution?.executabilityScore ?? null,
+          JSON.stringify(tc.execution?.issues ?? [])
         );
         if (tc.evaluation) scores.push(tc.evaluation.overallScore);
       }

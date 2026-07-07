@@ -161,6 +161,12 @@ button.ghost.danger { color: #ff9a98; border-color: #5a3030; }
 .prio { font-size: 12px; text-transform: capitalize; color: var(--muted); }
 .prio.critical, .prio.high { color: var(--amber); }
 .score { font-size: 12px; color: var(--green); }
+.exec { font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--border); }
+.exec.ok { color: var(--green); border-color: rgba(62, 207, 142, 0.4); }
+.exec.warn { color: var(--amber); border-color: rgba(239, 171, 39, 0.4); }
+.exec.bad { color: var(--red); border-color: rgba(239, 83, 80, 0.4); }
+.issues { margin: 4px 0 12px; padding-left: 18px; color: #ffb4b2; font-size: 13px; }
+.issues li { margin: 2px 0; }
 .case-body { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
 .case-body pre {
   background: var(--panel-2);

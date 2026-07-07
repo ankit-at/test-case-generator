@@ -42,6 +42,8 @@ export interface TestCase {
   tags: string[];
   priority: string;
   score: number | null;
+  executability: number | null;
+  execution_issues: string[];
 }
 
 export function getToken(): string | null {

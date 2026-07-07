@@ -75,6 +75,7 @@ router.get("/:id", (req: AuthedRequest, res) => {
       steps: safeParse(c.steps),
       assertions: safeParse(c.assertions),
       tags: safeParse(c.tags),
+      execution_issues: safeParse(c.execution_issues),
     })),
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@ankit-at/qaforge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate production-ready test cases from a BRD or skills inventory using an LLM. Import as a library, run from the CLI, or use the web app.",
   "type": "commonjs",
   "main": "dist/index.js",

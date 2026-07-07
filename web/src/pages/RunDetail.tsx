@@ -60,7 +60,19 @@ export default function RunDetail() {
               </div>
               <div className="case-meta">
                 <span className={`prio ${c.priority}`}>{c.priority}</span>
-                {c.score != null && <span className="score">{c.score}/100</span>}
+                {c.score != null && (
+                  <span className="score" title="LLM-as-judge quality score">
+                    Q {c.score}
+                  </span>
+                )}
+                {c.executability != null && (
+                  <span
+                    className={`exec ${c.executability >= 80 ? "ok" : c.executability >= 50 ? "warn" : "bad"}`}
+                    title="Executability: compiles, has assertions, no flaky waits"
+                  >
+                    E {c.executability}
+                  </span>
+                )}
               </div>
             </div>
             {open === c.id && (
@@ -73,6 +85,16 @@ export default function RunDetail() {
                         <li key={i}>{s}</li>
                       ))}
                     </ol>
+                  </>
+                )}
+                {c.execution_issues.length > 0 && (
+                  <>
+                    <h4>Executability issues</h4>
+                    <ul className="issues">
+                      {c.execution_issues.map((issue, i) => (
+                        <li key={i}>{issue}</li>
+                      ))}
+                    </ul>
                   </>
                 )}
                 <h4>Code</h4>

@@ -51,6 +51,8 @@ export interface TestCaseRow {
   tags: string;
   priority: string;
   score: number | null;
+  executability: number | null;
+  execution_issues: string;
 }
 
 const db = new Database(DB_PATH);
@@ -101,9 +103,21 @@ CREATE TABLE IF NOT EXISTS test_cases (
   assertions TEXT NOT NULL DEFAULT '[]',
   tags TEXT NOT NULL DEFAULT '[]',
   priority TEXT NOT NULL DEFAULT 'medium',
-  score REAL
+  score REAL,
+  executability REAL,
+  execution_issues TEXT NOT NULL DEFAULT '[]'
 );
 `);
+
+// Idempotent migrations for databases created before a column existed.
+function ensureColumn(table: string, column: string, ddl: string): void {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+}
+ensureColumn("test_cases", "executability", "executability REAL");
+ensureColumn("test_cases", "execution_issues", "execution_issues TEXT NOT NULL DEFAULT '[]'");
 
 const WEAK_ADMIN_PASSWORDS = new Set(["admin123", "admin", "password", "changeme"]);
 
