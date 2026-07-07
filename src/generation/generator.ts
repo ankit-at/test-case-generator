@@ -2,6 +2,7 @@ import { SkillParser } from "../core/skillParser";
 import { PromptBuilder } from "../core/promptBuilder";
 import { ClaudeClient } from "../core/claudeClient";
 import { EvaluationEngine } from "../evaluation/evaluator";
+import { attachValidation } from "../evaluation/executionValidator";
 import {
   GenerationConfig,
   GeneratedTestCase,
@@ -48,6 +49,8 @@ export class TestCaseGenerator {
       }
     }
 
+    // Deterministic executability check on the final code (no network).
+    attachValidation(testCase);
     return testCase;
   }
 

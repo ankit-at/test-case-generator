@@ -82,6 +82,33 @@ export interface GeneratedTestCase {
   rawResponse: string;
   timestamp: string;
   evaluation?: EvaluationScore;
+  execution?: SpecValidation;
+}
+
+/**
+ * Static "executability" assessment of a generated spec — compile validity plus
+ * structural checks. Deterministic; no app or browser required.
+ */
+export interface SpecValidation {
+  compiles: boolean | null; // null when no TS compiler is available to check
+  testCount: number;
+  hasAssertions: boolean;
+  hardWaitCount: number;
+  unawaitedActions: number;
+  issues: string[];
+  executabilityScore: number; // 0-100
+}
+
+/** Result of actually running generated specs through Playwright. */
+export interface ExecutionRunResult {
+  total: number;
+  passed: number;
+  failed: number;
+  flaky: number;
+  skipped: number;
+  passRate: number; // 0-100
+  durationMs: number;
+  raw?: unknown;
 }
 
 export interface GenerationError {

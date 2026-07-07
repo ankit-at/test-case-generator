@@ -257,6 +257,28 @@ Written to the `--out` directory:
 Low-scoring tests (below the configured threshold, default 75) are automatically
 refined once using the evaluator's feedback, and the higher-scoring version is kept.
 
+## Scoring & accuracy
+
+Every generated case carries two signals:
+
+- a **quality score** (0–100) from an LLM-as-judge pass (coverage, clarity,
+  automation-readiness, completeness, maintainability), and
+- an **executability score** — a deterministic check that the spec compiles, is
+  a real test with assertions, and avoids flaky patterns (`execution` field /
+  `validateSpec()`).
+
+For true **execution accuracy**, `runPlaywrightSpecs()` runs the generated specs
+against your app and reports pass / fail / flaky and a pass rate. See
+[`docs/accuracy.md`](docs/accuracy.md) for the full layered approach (rubric →
+executability → execution → coverage → human acceptance).
+
+```ts
+import { validateSpec, runPlaywrightSpecs } from "@ankit-at/qaforge";
+
+validateSpec(code);                              // { compiles, hasAssertions, executabilityScore, ... }
+await runPlaywrightSpecs({ projectDir: "./e2e" }); // { passed, failed, flaky, passRate, ... }
+```
+
 ## Security
 
 - **`JWT_SECRET` is required** (min 16 chars). The server refuses to issue or

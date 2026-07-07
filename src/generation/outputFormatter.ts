@@ -32,6 +32,8 @@ export class OutputFormatter {
         tags: tc.metadata.tags,
         priority: tc.metadata.priority,
         score: tc.evaluation?.overallScore,
+        executabilityScore: tc.execution?.executabilityScore,
+        executionIssues: tc.execution?.issues,
         code: tc.code,
       })),
     };

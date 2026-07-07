@@ -33,6 +33,11 @@ export {
   extractSkillsFromText,
 } from "./generation/requirementExtractor";
 export type { RequirementExtractionInput } from "./generation/requirementExtractor";
+export {
+  validateSpec,
+  runPlaywrightSpecs,
+} from "./evaluation/executionValidator";
+export type { PlaywrightRunOptions } from "./evaluation/executionValidator";
 
 // Types
 export type {
@@ -48,5 +53,7 @@ export type {
   GeneratedTestCase,
   GenerationError,
   EvaluationScore,
+  SpecValidation,
+  ExecutionRunResult,
   QualityReport,
 } from "./core/types";
