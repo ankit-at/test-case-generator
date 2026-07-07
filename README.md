@@ -11,7 +11,7 @@ metadata and an XLSX export.
 
 It ships in three forms:
 
-- **Library** — `import { generateTestCases } from "qaforge"` and
+- **Library** — `import { generateTestCases } from "@ankit-at/qaforge"` and
   generate cases from your own code.
 - **CLI** — feed it a structured *skills inventory* JSON (see below).
 - **Web UI** — log in, upload a BRD PDF, pick a module context and scope, and
@@ -27,11 +27,11 @@ BRD PDF ──▶ extract ──▶ Skills ──▶ Parser ──▶ Prompt ─
 Install it and call it from your own code — no server or UI required.
 
 ```bash
-npm install qaforge   # or: npm install github:ankit-at/QA-FORGE
+npm install @ankit-at/qaforge   # or: npm install github:ankit-at/QA-FORGE
 ```
 
 ```ts
-import { generateTestCases, OutputFormatter } from "qaforge";
+import { generateTestCases, OutputFormatter } from "@ankit-at/qaforge";
 
 const skills = [
   {
@@ -55,7 +55,7 @@ const spec = new OutputFormatter().formatPlaywright(testCases);
 Straight from a **skills inventory** (JSON string or parsed array):
 
 ```ts
-import { generateFromInventory } from "qaforge";
+import { generateFromInventory } from "@ankit-at/qaforge";
 const { testCases } = await generateFromInventory(jsonString, { preset: "standard" });
 ```
 
@@ -63,7 +63,7 @@ Straight from **requirements text** (e.g. a BRD you've already converted to
 text) — it extracts a skills inventory first, then generates and scores:
 
 ```ts
-import { generateFromText } from "qaforge";
+import { generateFromText } from "@ankit-at/qaforge";
 
 const { skills, testCases } = await generateFromText(
   {
