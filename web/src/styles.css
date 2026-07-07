@@ -167,6 +167,16 @@ button.ghost.danger { color: #ff9a98; border-color: #5a3030; }
 .exec.bad { color: var(--red); border-color: rgba(239, 83, 80, 0.4); }
 .issues { margin: 4px 0 12px; padding-left: 18px; color: #ffb4b2; font-size: 13px; }
 .issues li { margin: 2px 0; }
+
+.pass-rate { color: var(--green); font-size: 12px; }
+.run-tests h4 { margin: 0 0 10px; }
+.run-row { display: flex; gap: 10px; align-items: center; }
+.run-row input { margin: 0; }
+.run-row button { white-space: nowrap; }
+.exec-result { display: flex; gap: 16px; align-items: center; margin-top: 12px; font-size: 14px; }
+.exec-result .pass { color: var(--green); }
+.exec-result .fail { color: var(--red); }
+.exec-result .flaky { color: var(--amber); }
 .case-body { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
 .case-body pre {
   background: var(--panel-2);

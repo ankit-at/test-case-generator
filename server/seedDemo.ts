@@ -3,6 +3,7 @@
 import "./env";
 import db, { seedAdmin } from "./db";
 import bcrypt from "bcryptjs";
+import { validateSpec } from "../src/evaluation/executionValidator";
 
 seedAdmin();
 
@@ -71,13 +72,18 @@ function run(
   scopeTypes: string[],
   cases: DemoCase[],
   createdAt: string
-) {
+): number {
   const avg = Math.round(cases.reduce((a, c) => a + c.score, 0) / cases.length);
+  // Real executability from the same validator the engine uses.
+  const execs = cases.map((c) => validateSpec(c.code));
+  const avgExec = Math.round(
+    execs.reduce((a, e) => a + e.executabilityScore, 0) / execs.length
+  );
   const runId = Number(
     db
       .prepare(
-        `INSERT INTO runs (title, user_id, module_context_id, brd_filename, brd_text, scope, status, avg_score, test_case_count, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?)`
+        `INSERT INTO runs (title, user_id, module_context_id, brd_filename, brd_text, scope, status, avg_score, avg_executability, test_case_count, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?)`
       )
       .run(
         title,
@@ -87,15 +93,16 @@ function run(
         "Business requirements document text…",
         JSON.stringify({ types: scopeTypes, notes: "" }),
         avg,
+        avgExec,
         cases.length,
         createdAt
       ).lastInsertRowid
   );
   const stmt = db.prepare(
-    `INSERT INTO test_cases (run_id, skill_id, test_name, code, steps, assertions, tags, priority, score)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO test_cases (run_id, skill_id, test_name, code, steps, assertions, tags, priority, score, executability, execution_issues)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  for (const c of cases) {
+  cases.forEach((c, i) => {
     stmt.run(
       runId,
       c.skillId,
@@ -105,12 +112,15 @@ function run(
       JSON.stringify([]),
       JSON.stringify(c.tags),
       c.priority,
-      c.score
+      c.score,
+      execs[i].executabilityScore,
+      JSON.stringify(execs[i].issues)
     );
-  }
+  });
+  return runId;
 }
 
-run(
+const checkoutRunId = run(
   "Checkout — payment flow",
   ankit,
   shop,
@@ -317,6 +327,16 @@ run(
     },
   ],
   "2026-07-02 14:22:00"
+);
+
+// Show a live-execution result on one run so the pass-rate surfaces in the UI.
+db.prepare(
+  `UPDATE runs SET exec_pass_rate=?, exec_summary=?, exec_ran_at=? WHERE id=?`
+).run(
+  92,
+  JSON.stringify({ total: 3, passed: 2, failed: 0, flaky: 1, skipped: 0, durationMs: 8400 }),
+  "2026-07-05 09:20:00",
+  checkoutRunId
 );
 
 console.log("Demo data seeded.");

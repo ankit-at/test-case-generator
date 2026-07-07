@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { api, RunSummary, TestCase } from "../api/client";
+import { api, RunSummary, TestCase, ExecutionResult } from "../api/client";
 
 export default function RunDetail() {
   const { id } = useParams();
@@ -10,6 +10,23 @@ export default function RunDetail() {
   const [open, setOpen] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [baseUrl, setBaseUrl] = useState("");
+  const [running, setRunning] = useState(false);
+  const [execResult, setExecResult] = useState<ExecutionResult | null>(null);
+  const [execError, setExecError] = useState("");
+
+  const runTests = async () => {
+    setExecError("");
+    setExecResult(null);
+    setRunning(true);
+    try {
+      setExecResult(await api.executeRun(runId, baseUrl.trim()));
+    } catch (e) {
+      setExecError((e as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  };
 
   useEffect(() => {
     api
@@ -45,6 +62,33 @@ export default function RunDetail() {
         <span className={`badge ${run.status}`}>{run.status}</span>
       </div>
       {run.error && <div className="error">{run.error}</div>}
+
+      <div className="card run-tests">
+        <h4>Run these tests against a target</h4>
+        <div className="run-row">
+          <input
+            placeholder="Target base URL, e.g. https://your-app.com"
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+          />
+          <button onClick={runTests} disabled={running || !baseUrl.trim()}>
+            {running ? "Running…" : "Run tests"}
+          </button>
+        </div>
+        {execError && <div className="error">{execError}</div>}
+        {execResult && (
+          <div className="exec-result">
+            <span className="pass">{execResult.passed} passed</span>
+            <span className="fail">{execResult.failed} failed</span>
+            <span className="flaky">{execResult.flaky} flaky</span>
+            <span className="muted">{execResult.skipped} skipped</span>
+            <strong>{execResult.passRate}% pass rate</strong>
+          </div>
+        )}
+        <div className="muted small">
+          Requires @playwright/test + browsers on the server and a reachable URL.
+        </div>
+      </div>
 
       <div className="cases">
         {cases.map((c) => (

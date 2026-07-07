@@ -1,8 +1,12 @@
 import { Router } from "express";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import db, { RunRow, TestCaseRow } from "../db";
 import { requireAuth, AuthedRequest } from "../auth";
 import { runGeneration } from "../pipeline/runGeneration";
 import { OutputFormatter } from "../../src/generation/outputFormatter";
+import { runPlaywrightSpecs } from "../../src/evaluation/executionValidator";
 import { GeneratedTestCase } from "../../src/core/types";
 
 const router = Router();
@@ -104,6 +108,76 @@ router.get("/:id/export", async (req: AuthedRequest, res) => {
   } else {
     res.setHeader("Content-Disposition", `attachment; filename="${base}.spec.ts"`);
     res.type("text/plain").send(formatter.formatPlaywright(testCases));
+  }
+});
+
+// Execute a run's generated specs through Playwright and record the results.
+// Needs @playwright/test installed and a target base URL.
+router.post("/:id/execute", async (req: AuthedRequest, res) => {
+  const run = loadOwnedRun(req, Number(req.params.id));
+  if (!run) return res.status(404).json({ error: "Run not found." });
+
+  const baseUrl =
+    (req.body && req.body.baseUrl) || process.env.TCGEN_TEST_BASE_URL || "";
+  if (!baseUrl) {
+    return res.status(400).json({
+      error:
+        "A target base URL is required. Provide baseUrl or set TCGEN_TEST_BASE_URL.",
+    });
+  }
+
+  const rows = db
+    .prepare("SELECT * FROM test_cases WHERE run_id = ? ORDER BY id")
+    .all(run.id) as TestCaseRow[];
+  if (rows.length === 0) {
+    return res.status(400).json({ error: "This run has no test cases." });
+  }
+
+  let dir: string | undefined;
+  try {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), `qaforge-run-${run.id}-`));
+    fs.mkdirSync(path.join(dir, "tests"));
+    fs.writeFileSync(
+      path.join(dir, "playwright.config.ts"),
+      `import { defineConfig } from '@playwright/test';\n` +
+        `export default defineConfig({\n` +
+        `  testDir: './tests',\n` +
+        `  use: { baseURL: ${JSON.stringify(baseUrl)} },\n` +
+        `});\n`
+    );
+    rows.forEach((row, i) => {
+      fs.writeFileSync(
+        path.join(dir!, "tests", `case-${i + 1}.spec.ts`),
+        row.code
+      );
+    });
+
+    const result = await runPlaywrightSpecs({ projectDir: dir });
+    const ranAt = new Date().toISOString();
+    db.prepare(
+      `UPDATE runs SET exec_pass_rate=?, exec_summary=?, exec_ran_at=? WHERE id=?`
+    ).run(
+      result.passRate,
+      JSON.stringify({
+        total: result.total,
+        passed: result.passed,
+        failed: result.failed,
+        flaky: result.flaky,
+        skipped: result.skipped,
+        durationMs: result.durationMs,
+      }),
+      ranAt,
+      run.id
+    );
+    res.json({ ...result, ranAt });
+  } catch (err) {
+    console.error(`Execution failed for run ${run.id}:`, err);
+    res.status(500).json({
+      error:
+        "Execution failed. Ensure @playwright/test and browsers are installed (npx playwright install) and the base URL is reachable.",
+    });
+  } finally {
+    if (dir) fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 

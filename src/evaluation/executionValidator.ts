@@ -108,15 +108,19 @@ export function attachValidation(tc: GeneratedTestCase): GeneratedTestCase {
 
 function countUnawaitedActions(code: string): number {
   let count = 0;
-  const actionRe = new RegExp(
-    `(\\w+)?\\.(${ASYNC_ACTIONS.join("|")})\\s*\\(`,
-    "g"
-  );
+  const actionRe = new RegExp(`\\.(${ASYNC_ACTIONS.join("|")})\\s*\\(`, "g");
   let m: RegExpExecArray | null;
   while ((m = actionRe.exec(code)) !== null) {
-    // Look at the ~12 chars before the match for an `await` / `return`.
-    const before = code.slice(Math.max(0, m.index - 12), m.index);
-    if (!/(await|return)\s*$/.test(before)) count++;
+    // Consider the whole statement leading up to the action (await may sit at
+    // the front of a chain, e.g. `await page.getByRole(...).click()`).
+    // Only `;` and newline delimit statements — braces appear inside option
+    // objects (e.g. getByRole('button', { name: 'X' }).click()).
+    const boundary = Math.max(
+      code.lastIndexOf(";", m.index),
+      code.lastIndexOf("\n", m.index)
+    );
+    const statement = code.slice(boundary + 1, m.index);
+    if (!/\b(await|return)\b/.test(statement)) count++;
   }
   return count;
 }

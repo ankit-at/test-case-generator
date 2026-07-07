@@ -27,9 +27,23 @@ export interface RunSummary {
   module_name?: string | null;
   status: string;
   avg_score: number | null;
+  avg_executability: number | null;
   test_case_count: number;
   error: string | null;
+  exec_pass_rate: number | null;
+  exec_ran_at: string | null;
   created_at: string;
+}
+
+export interface ExecutionResult {
+  total: number;
+  passed: number;
+  failed: number;
+  flaky: number;
+  skipped: number;
+  passRate: number;
+  durationMs: number;
+  ranAt: string;
 }
 
 export interface TestCase {
@@ -145,5 +159,10 @@ export const api = {
     ),
   getRun: (id: number) =>
     request<{ run: RunSummary; testCases: TestCase[] }>(`/runs/${id}`),
+  executeRun: (id: number, baseUrl: string) =>
+    request<ExecutionResult>(`/runs/${id}/execute`, {
+      method: "POST",
+      body: JSON.stringify({ baseUrl }),
+    }),
   exportUrl: (id: number, format: string) => `/api/runs/${id}/export?format=${format}`,
 };

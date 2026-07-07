@@ -111,9 +111,17 @@ export async function runGeneration(req: RunRequest): Promise<RunOutcome> {
         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
         : null;
 
+    const execScores = testCases
+      .map((tc) => tc.execution?.executabilityScore)
+      .filter((s): s is number => typeof s === "number");
+    const avgExec =
+      execScores.length > 0
+        ? Math.round(execScores.reduce((a, b) => a + b, 0) / execScores.length)
+        : null;
+
     db.prepare(
-      `UPDATE runs SET status='completed', avg_score=?, test_case_count=?, error=NULL WHERE id=?`
-    ).run(avg, testCases.length, runId);
+      `UPDATE runs SET status='completed', avg_score=?, avg_executability=?, test_case_count=?, error=NULL WHERE id=?`
+    ).run(avg, avgExec, testCases.length, runId);
 
     return { runId, testCaseCount: testCases.length, avgScore: avg };
   } catch (err) {

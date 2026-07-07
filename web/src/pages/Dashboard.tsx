@@ -67,7 +67,8 @@ export default function Dashboard() {
               {isAdmin && <th>User</th>}
               <th>Module</th>
               <th>Cases</th>
-              <th>Avg score</th>
+              <th>Quality</th>
+              <th>Exec</th>
               <th>Status</th>
               <th>Created</th>
             </tr>
@@ -82,6 +83,14 @@ export default function Dashboard() {
                 <td>{r.module_name || "—"}</td>
                 <td>{r.test_case_count}</td>
                 <td>{r.avg_score != null ? `${r.avg_score}/100` : "—"}</td>
+                <td>
+                  {r.avg_executability != null ? `${r.avg_executability}/100` : "—"}
+                  {r.exec_pass_rate != null && (
+                    <span className="pass-rate" title="Playwright pass rate">
+                      {" "}· {r.exec_pass_rate}% pass
+                    </span>
+                  )}
+                </td>
                 <td>
                   <span className={`badge ${r.status}`}>{r.status}</span>
                 </td>

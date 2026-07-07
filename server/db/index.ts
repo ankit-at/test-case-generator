@@ -35,8 +35,12 @@ export interface RunRow {
   scope: string;
   status: string;
   avg_score: number | null;
+  avg_executability: number | null;
   test_case_count: number;
   error: string | null;
+  exec_pass_rate: number | null;
+  exec_summary: string | null;
+  exec_ran_at: string | null;
   created_at: string;
 }
 
@@ -88,8 +92,12 @@ CREATE TABLE IF NOT EXISTS runs (
   scope TEXT NOT NULL DEFAULT '{}',
   status TEXT NOT NULL DEFAULT 'completed',
   avg_score REAL,
+  avg_executability REAL,
   test_case_count INTEGER NOT NULL DEFAULT 0,
   error TEXT,
+  exec_pass_rate REAL,
+  exec_summary TEXT,
+  exec_ran_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -118,6 +126,10 @@ function ensureColumn(table: string, column: string, ddl: string): void {
 }
 ensureColumn("test_cases", "executability", "executability REAL");
 ensureColumn("test_cases", "execution_issues", "execution_issues TEXT NOT NULL DEFAULT '[]'");
+ensureColumn("runs", "avg_executability", "avg_executability REAL");
+ensureColumn("runs", "exec_pass_rate", "exec_pass_rate REAL");
+ensureColumn("runs", "exec_summary", "exec_summary TEXT");
+ensureColumn("runs", "exec_ran_at", "exec_ran_at TEXT");
 
 const WEAK_ADMIN_PASSWORDS = new Set(["admin123", "admin", "password", "changeme"]);
 
